@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { aiCreationService } from '../services/aiCreationService';
 
 const AICreation = () => {
+  const { user } = useAuth();
   const [inputText, setInputText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [generatedImage, setGeneratedImage] = useState('');
-  const [generated3D, setGenerated3D] = useState('');
+  const [creationId, setCreationId] = useState<string | null>(null);
   const [recognition, setRecognition] = useState<any>(null);
+  const [webhookStatus, setWebhookStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const steps = [
     { id: 1, name: 'Text Input', status: 'pending' },
     { id: 2, name: 'Text to Image', status: 'pending' },
-    { id: 3, name: 'Image to 3D', status: 'pending' },
-    { id: 4, name: 'Ready for Print', status: 'pending' }
+    { id: 3, name: 'Image Ready', status: 'pending' }
   ];
 
   useEffect(() => {
@@ -43,42 +47,105 @@ const AICreation = () => {
     }
   };
 
-  const simulateWebhook = async () => {
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
-    return {
-      success: true,
-      data: {
-        image_url: 'https://via.placeholder.com/400x400/ff6b9d/ffffff?text=AI+Generated',
-        model_url: 'https://via.placeholder.com/400x400/1c1e3b/ffffff?text=3D+Model'
+  // Call Huanyuan webhook for text-to-image generation
+  const callHuanyuanWebhook = async (text: string, creationId: string) => {
+    try {
+      setWebhookStatus('sending');
+      
+      const webhookUrl = import.meta.env.VITE_HUANYUAN_WEBHOOK_URL || 'https://n8nprimary.cudliy.com/webhook-test/textimage';
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text,
+          creation_id: creationId,
+          user_id: user?.id,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Webhook failed: ${response.status} ${response.statusText}`);
       }
-    };
+
+      const result = await response.json();
+      setWebhookStatus('success');
+      
+      return {
+        success: true,
+        data: result
+      };
+    } catch (error) {
+      console.error('Webhook error:', error);
+      setWebhookStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to connect to Huanyuan service');
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
   };
 
   const handleCreate = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !user) {
+      setErrorMessage('Please enter text and ensure you are logged in');
+      return;
+    }
     
     setIsProcessing(true);
     setCurrentStep(1);
+    setErrorMessage('');
+    setWebhookStatus('idle');
     
     try {
+      // Step 1: Create database record
+      const { data: creation, error: dbError } = await aiCreationService.createCreation(user.id, inputText.trim());
+      
+      if (dbError || !creation) {
+        throw new Error(dbError?.message || 'Failed to create database record');
+      }
+      
+      setCreationId(creation.id);
+      
       // Step 2: Text to Image (Huanyuan)
       setCurrentStep(2);
-      const huanyuanResponse = await simulateWebhook();
-      setGeneratedImage(huanyuanResponse.data.image_url);
+      const huanyuanResponse = await callHuanyuanWebhook(inputText.trim(), creation.id);
       
-      // Step 3: Image to 3D (Trellis)
-      setCurrentStep(3);
-      const trellisResponse = await simulateWebhook();
-      setGenerated3D(trellisResponse.data.model_url);
-      
-      // Step 4: Complete
-      setCurrentStep(4);
+      if (huanyuanResponse.success && huanyuanResponse.data?.image_url) {
+        // Update database with image URL
+        const { error: updateError } = await aiCreationService.updateWithImage(
+          creation.id, 
+          huanyuanResponse.data.image_url
+        );
+        
+        if (updateError) {
+          console.warn('Failed to update database with image URL:', updateError);
+        }
+        
+        setGeneratedImage(huanyuanResponse.data.image_url);
+        setCurrentStep(3); // Image Ready
+      } else {
+        throw new Error(huanyuanResponse.error || 'Failed to generate image');
+      }
       
     } catch (error) {
       console.error('Creation failed:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const resetForm = () => {
+    setInputText('');
+    setCurrentStep(0);
+    setGeneratedImage('');
+    setCreationId(null);
+    setWebhookStatus('idle');
+    setErrorMessage('');
   };
 
   return (
@@ -161,8 +228,7 @@ const AICreation = () => {
                       <p className="text-sm text-gray-600">
                         {step.id === 1 && 'Enter your description'}
                         {step.id === 2 && 'Converting to image with Huanyuan'}
-                        {step.id === 3 && 'Converting to 3D with Trellis'}
-                        {step.id === 4 && '3D model ready'}
+                        {step.id === 3 && 'Image generation complete'}
                       </p>
                     </div>
                     {step.id === currentStep && isProcessing && (
@@ -172,6 +238,43 @@ const AICreation = () => {
                 ))}
               </div>
             </div>
+
+            {/* Webhook Status */}
+            <div className="bg-white rounded-2xl card-shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Webhook Status</h3>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${
+                    webhookStatus === 'idle' ? 'bg-gray-400' :
+                    webhookStatus === 'sending' ? 'bg-yellow-400 animate-pulse' :
+                    webhookStatus === 'success' ? 'bg-green-400' :
+                    'bg-red-400'
+                  }`}></div>
+                  <span className="text-sm font-medium">
+                    {webhookStatus === 'idle' && 'Ready to send'}
+                    {webhookStatus === 'sending' && 'Sending to Huanyuan...'}
+                    {webhookStatus === 'success' && 'Successfully received by n8n'}
+                    {webhookStatus === 'error' && 'Failed to connect'}
+                  </span>
+                </div>
+                {creationId && (
+                  <p className="text-xs text-gray-500">Creation ID: {creationId}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Error Display */}
+            {errorMessage && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h4 className="text-sm font-semibold text-red-800">Error</h4>
+                </div>
+                <p className="text-sm text-red-700 mt-1">{errorMessage}</p>
+              </div>
+            )}
           </div>
 
           {/* Results Section */}
@@ -182,31 +285,26 @@ const AICreation = () => {
                 <div className="aspect-square rounded-xl overflow-hidden bg-gray-100">
                   <img src={generatedImage} alt="Generated from text" className="w-full h-full object-cover" />
                 </div>
-                <p className="text-sm text-gray-500 mt-2">Created with Huanyuan AI</p>
-              </div>
-            )}
-
-            {generated3D && (
-              <div className="bg-white rounded-2xl card-shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">3D Model Ready</h3>
-                <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <img src={generated3D} alt="3D model" className="w-full h-full object-cover" />
-                </div>
                 <div className="mt-4 space-y-3">
-                  <p className="text-sm text-gray-500">Created with Trellis AI</p>
+                  <p className="text-sm text-gray-500">Created with Huanyuan AI</p>
                   <div className="flex space-x-3">
-                    <button className="flex-1 py-2 px-4 bg-[#8B0000] text-white rounded-lg hover:bg-[#6B0000] transition-colors">
-                      Download 3D Model
+                    <button 
+                      onClick={resetForm}
+                      className="flex-1 py-2 px-4 bg-[#8B0000] text-white rounded-lg hover:bg-[#6B0000] transition-colors"
+                    >
+                      Create Another
                     </button>
                     <button className="flex-1 py-2 px-4 border border-[#8B0000] text-[#8B0000] rounded-lg hover:bg-[#8B0000] hover:text-white transition-colors">
-                      Add to Print Queue
+                      Save Image
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {!generatedImage && !generated3D && (
+
+
+            {!generatedImage && (
               <div className="bg-white rounded-2xl card-shadow p-6">
                 <div className="text-center py-12">
                   <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
