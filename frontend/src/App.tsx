@@ -53,11 +53,11 @@ function AppContent() {
   return (
     <div className="App">
       {/* Navigation for auth pages */}
-      <div className="fixed top-4 left-4 z-50 bg-white rounded-xl shadow-lg p-2">
-        <div className="flex space-x-2">
+      <div className="fixed top-4 left-4 right-4 z-50 bg-white rounded-xl shadow-lg p-2 md:left-4 md:right-auto md:w-auto">
+        <div className="flex justify-center md:justify-start space-x-2">
           <button
             onClick={() => navigateTo('signin')}
-            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               currentPage === 'signin' 
                 ? 'bg-[#8B0000] text-white' 
                 : 'text-gray-600 hover:text-[#8B0000]'
@@ -67,7 +67,7 @@ function AppContent() {
           </button>
           <button
             onClick={() => navigateTo('signup')}
-            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               currentPage === 'signup' 
                 ? 'bg-[#8B0000] text-white' 
                 : 'text-gray-600 hover:text-[#8B0000]'
