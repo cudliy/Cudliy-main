@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #8B0000;
+  --color-secondary: #2F4F2F;
+  --color-accent: #90EE90;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+}
+
+@layer base {
+  html {
+    font-family: 'Nunito', system-ui, sans-serif;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+}
+
+@layer components {
+  .brand-gradient {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  }
+  
+  .card-shadow {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .floating-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .bounce-gentle {
+    animation: bounce-gentle 2s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
