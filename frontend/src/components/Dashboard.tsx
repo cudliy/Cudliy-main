@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { aiCreationService } from '../services/aiCreationService';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+
   const [isPrinting, setIsPrinting] = useState(false);
   const [showAICreation, setShowAICreation] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -30,8 +30,8 @@ const Dashboard = () => {
   const quickActions = [
     { name: 'AI Creation', icon: '🤖', action: () => setShowAICreation(true) },
     { name: 'Start New Print', icon: '🖨️', action: () => setIsPrinting(true) },
-    { name: 'View Queue', icon: '📋', action: () => setActiveTab('queue') },
-    { name: 'Analytics', icon: '📊', action: () => setActiveTab('analytics') },
+    { name: 'View Queue', icon: '📋', action: () => console.log('View Queue clicked') },
+    { name: 'Analytics', icon: '📊', action: () => console.log('Analytics clicked') },
   ];
 
   // Speech recognition setup
@@ -150,7 +150,7 @@ const Dashboard = () => {
     }
   };
 
-  const simulateWebhook = async (webhookUrl: string, data: any) => {
+  const simulateWebhook = async () => {
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
     return {
       success: true,
@@ -180,7 +180,7 @@ const Dashboard = () => {
         })
       });
 
-      const { clientSecret } = await response.json();
+      const responseData = await response.json();
       
       // In a real implementation, you would use Stripe.js to confirm the payment
       // For now, we'll simulate a successful payment
@@ -220,10 +220,7 @@ const Dashboard = () => {
       
       // Step 2: Text to Image (Huanyuan)
       setCurrentStep(2);
-      const huanyuanResponse = await simulateWebhook(
-        'https://your-n8n-instance.com/webhook/huanyuan',
-        { text: inputText }
-      );
+      const huanyuanResponse = await simulateWebhook();
       setGeneratedImage(huanyuanResponse.data.image_url);
       
       // Update Supabase with image
@@ -233,10 +230,7 @@ const Dashboard = () => {
       
       // Step 3: Image to 3D (Trellis)
       setCurrentStep(3);
-      const trellisResponse = await simulateWebhook(
-        'https://your-n8n-instance.com/webhook/trellis',
-        { image_url: huanyuanResponse.data.image_url }
-      );
+      const trellisResponse = await simulateWebhook();
       setGenerated3D(trellisResponse.data.model_url);
       
       // Update Supabase with 3D model

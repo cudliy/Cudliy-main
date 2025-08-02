@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Toast from './Toast';
 
@@ -13,7 +13,6 @@ const SignUp = () => {
     businessName: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [step, setStep] = useState(1);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');

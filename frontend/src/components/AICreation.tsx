@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const AICreation = () => {
   const [inputText, setInputText] = useState('');
@@ -43,7 +43,7 @@ const AICreation = () => {
     }
   };
 
-  const simulateWebhook = async (webhookUrl: string, data: any) => {
+  const simulateWebhook = async () => {
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
     return {
       success: true,
@@ -63,18 +63,12 @@ const AICreation = () => {
     try {
       // Step 2: Text to Image (Huanyuan)
       setCurrentStep(2);
-      const huanyuanResponse = await simulateWebhook(
-        'https://your-n8n-instance.com/webhook/huanyuan',
-        { text: inputText }
-      );
+      const huanyuanResponse = await simulateWebhook();
       setGeneratedImage(huanyuanResponse.data.image_url);
       
       // Step 3: Image to 3D (Trellis)
       setCurrentStep(3);
-      const trellisResponse = await simulateWebhook(
-        'https://your-n8n-instance.com/webhook/trellis',
-        { image_url: huanyuanResponse.data.image_url }
-      );
+      const trellisResponse = await simulateWebhook();
       setGenerated3D(trellisResponse.data.model_url);
       
       // Step 4: Complete
