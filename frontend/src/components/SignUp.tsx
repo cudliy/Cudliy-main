@@ -342,9 +342,15 @@ const SignUp = () => {
         <div className="text-center">
           <p className="text-gray-600">
             Already have an account?{' '}
-            <a href="/signin" className="font-semibold text-[#8B0000] hover:text-[#6B0000] transition-colors">
+            <button 
+              onClick={() => {
+                window.history.pushState({}, '', '/signin');
+                window.location.reload();
+              }}
+              className="font-semibold text-[#8B0000] hover:text-[#6B0000] transition-colors underline"
+            >
               Sign in here
-            </a>
+            </button>
           </p>
         </div>
       </div>
