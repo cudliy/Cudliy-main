@@ -52,7 +52,7 @@ const AICreation = () => {
     try {
       setWebhookStatus('sending');
       
-      const webhookUrl = import.meta.env.VITE_HUANYUAN_WEBHOOK_URL || 'https://n8nprimary.cudliy.com/webhook-test/textimage';
+      const webhookUrl = import.meta.env.VITE_HUANYUAN_WEBHOOK_URL || 'https://n8nprimary.cudliy.com/webhook-test/90d50690-98d2-4a24-a435-5e1e45d55fb2';
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
@@ -73,8 +73,8 @@ const AICreation = () => {
       const result = await response.json();
       setWebhookStatus('success');
       
-      return {
-        success: true,
+    return {
+      success: true,
         data: result
       };
     } catch (error) {
