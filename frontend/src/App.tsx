@@ -52,9 +52,9 @@ function AppContent() {
 
   return (
     <div className="App">
-      {/* Navigation for auth pages */}
-      <div className="fixed top-4 left-4 right-4 z-50 bg-white rounded-xl shadow-lg p-2 md:left-4 md:right-auto md:w-auto">
-        <div className="flex justify-center md:justify-start space-x-2">
+      {/* Navigation for auth pages - Hidden on mobile */}
+      <div className="hidden md:block fixed top-4 left-4 z-50 bg-white rounded-xl shadow-lg p-2">
+        <div className="flex space-x-2">
           <button
             onClick={() => navigateTo('signin')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
