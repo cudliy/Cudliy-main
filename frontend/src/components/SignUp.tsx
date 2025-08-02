@@ -29,7 +29,6 @@ const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
 
     try {
       const { error } = await signUp(formData.email, formData.password, {
@@ -41,12 +40,10 @@ const SignUp = () => {
       
       if (error) {
         if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
-          setError('Too many requests. Please wait an hour before trying again, or use Google OAuth.');
           setToastMessage('Too many requests. Please wait an hour before trying again, or use Google OAuth.');
           setToastType('error');
           setShowToast(true);
         } else {
-          setError(error.message);
           setToastMessage(error.message);
           setToastType('error');
           setShowToast(true);
@@ -64,7 +61,6 @@ const SignUp = () => {
         }, 3000);
       }
     } catch (err) {
-      setError('An unexpected error occurred');
       setToastMessage('An unexpected error occurred');
       setToastType('error');
       setShowToast(true);
@@ -75,25 +71,21 @@ const SignUp = () => {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    setError('');
 
     try {
       const { error } = await signInWithGoogle();
       if (error) {
         if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
-          setError('Too many requests. Please wait an hour before trying again.');
           setToastMessage('Too many requests. Please wait an hour before trying again.');
           setToastType('error');
           setShowToast(true);
         } else {
-          setError(error.message);
           setToastMessage(error.message);
           setToastType('error');
           setShowToast(true);
         }
       }
     } catch (err) {
-      setError('An unexpected error occurred');
       setToastMessage('An unexpected error occurred');
       setToastType('error');
       setShowToast(true);

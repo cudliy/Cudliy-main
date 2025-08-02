@@ -180,7 +180,7 @@ const Dashboard = () => {
         })
       });
 
-      const responseData = await response.json();
+      await response.json();
       
       // In a real implementation, you would use Stripe.js to confirm the payment
       // For now, we'll simulate a successful payment
