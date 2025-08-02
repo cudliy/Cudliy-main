@@ -8,21 +8,33 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState('signin')
   const { user, loading } = useAuth()
 
-  // Handle URL-based routing
+  // Handle hash-based routing
   useEffect(() => {
-    const path = window.location.pathname
-    if (path === '/signup') {
-      setCurrentPage('signup')
-    } else if (path === '/signin' || path === '/') {
-      setCurrentPage('signin')
+    const handleHashChange = () => {
+      const hash = window.location.hash
+      if (hash === '#/signup') {
+        setCurrentPage('signup')
+      } else if (hash === '#/signin' || hash === '#/' || !hash) {
+        setCurrentPage('signin')
+      }
+    }
+
+    // Set initial page based on hash
+    handleHashChange()
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
 
-  // Update URL when page changes
+  // Update hash when page changes
   const navigateTo = (page: string) => {
     setCurrentPage(page)
-    const path = page === 'signup' ? '/signup' : '/signin'
-    window.history.pushState({}, '', path)
+    const hash = page === 'signup' ? '#/signup' : '#/signin'
+    window.location.hash = hash
   }
 
   if (loading) {

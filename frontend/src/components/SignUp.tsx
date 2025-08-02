@@ -56,8 +56,7 @@ const SignUp = () => {
         
         // Redirect to sign in after 3 seconds
         setTimeout(() => {
-          window.history.pushState({}, '', '/signin');
-          window.location.reload();
+          window.location.hash = '#/signin';
         }, 3000);
       }
     } catch (err) {
@@ -344,8 +343,7 @@ const SignUp = () => {
             Already have an account?{' '}
             <button 
               onClick={() => {
-                window.history.pushState({}, '', '/signin');
-                window.location.reload();
+                window.location.hash = '#/signin';
               }}
               className="font-semibold text-[#8B0000] hover:text-[#6B0000] transition-colors underline"
             >

@@ -225,8 +225,7 @@ const SignIn = () => {
             Don't have an account?{' '}
             <button 
               onClick={() => {
-                window.history.pushState({}, '', '/signup');
-                window.location.reload();
+                window.location.hash = '#/signup';
               }}
               className="font-semibold text-[#8B0000] hover:text-[#6B0000] transition-colors underline"
             >
