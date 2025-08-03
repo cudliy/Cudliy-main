@@ -13,8 +13,6 @@ const Dashboard = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [generatedImage, setGeneratedImage] = useState('');
-  const [generated3DModel, setGenerated3DModel] = useState('');
-  const [creationId, setCreationId] = useState<string | null>(null);
 
   const [recognition, setRecognition] = useState<any>(null);
 
@@ -179,12 +177,14 @@ const Dashboard = () => {
       
       console.log('Database response:', { newCreation, creationError });
       
-      if (creationError || !newCreation) {
+      if (creationError) {
         console.error('Failed to create record:', creationError);
         return;
       }
       
-      // Step 2: Text to Image (Stable Diffusion)
+
+      
+      // Step 2: Text to Image (Huanyuan)
       setCurrentStep(2);
       console.log('=== DASHBOARD CALLING WEBHOOK ===');
       
@@ -199,63 +199,23 @@ const Dashboard = () => {
       
       if (huanyuanResponse.success && huanyuanResponse.data?.image_url) {
         setGeneratedImage(huanyuanResponse.data.image_url);
-        setCreationId(newCreation.id); // Store creation ID for 3D conversion
-        setCurrentStep(2); // Stop at image generation
-        
-        // Update Supabase with image
-        await aiCreationService.updateWithImage(newCreation.id, huanyuanResponse.data.image_url);
       } else {
         console.error('Webhook failed:', huanyuanResponse.error);
+        // Fallback to placeholder
+        setGeneratedImage('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOEIwMDAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkZhaWxlZDwvdGV4dD48L3N2Zz4=');
       }
+      
+      // Update Supabase with image
+      if (newCreation?.id && huanyuanResponse.data?.image_url) {
+        await aiCreationService.updateWithImage(newCreation.id, huanyuanResponse.data.image_url);
+      }
+      
+      // For now, we're only doing text-to-image (not 3D conversion)
+      // Step 3: Complete
+      setCurrentStep(3);
       
     } catch (error) {
       console.error('Creation failed:', error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Handle 3D conversion
-  const handleConvertTo3D = async () => {
-    if (!generatedImage || !creationId || !user) {
-      console.error('Missing image or user data for 3D conversion');
-      return;
-    }
-
-    setIsProcessing(true);
-    setCurrentStep(3);
-
-    try {
-      console.log('=== DASHBOARD CALLING 3D WEBHOOK ===');
-      console.log('Converting image to 3D with URL:', generatedImage);
-
-      // Call second webhook for 3D conversion
-      const trellisResponse = await webhookService.callImageTo3DWebhook(
-        generatedImage,
-        creationId,
-        user.id
-      );
-
-      // Step 4: 3D Model Ready
-      if (trellisResponse.success && trellisResponse.data?.model_url) {
-        const modelUrl = trellisResponse.data.model_url;
-        setGenerated3DModel(modelUrl);
-        setCurrentStep(4);
-
-        // Update database with 3D model URL
-        const { error: model3DError } = await aiCreationService.updateWith3DModel(
-          creationId,
-          modelUrl
-        );
-
-        if (model3DError) {
-          console.warn('Failed to update database with 3D model URL:', model3DError);
-        }
-      } else {
-        console.warn('3D conversion did not return a model URL:', trellisResponse);
-      }
-    } catch (trellisError) {
-      console.error('3D conversion error:', trellisError);
     } finally {
       setIsProcessing(false);
     }
@@ -428,7 +388,7 @@ const Dashboard = () => {
           <div className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-hide">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">AI-Powered 3D Creation</h2>
+                <h2 className="text-2xl font-bold text-gray-900">AI-Powered Image Generation</h2>
                 <button
                   onClick={() => setShowAICreation(false)}
                   className="p-2 text-gray-400 hover:text-gray-600"
@@ -503,10 +463,10 @@ const Dashboard = () => {
                         {isProcessing ? (
                           <div className="flex items-center justify-center">
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                            {currentStep === 1 ? 'Generating image...' : currentStep === 3 ? 'Converting to 3D...' : 'Processing...'}
+                            Generating image...
                           </div>
                         ) : (
-                          'Start Creation'
+                          'Generate Image'
                         )}
                       </button>
                     </div>
@@ -518,9 +478,8 @@ const Dashboard = () => {
                     <div className="space-y-3">
                       {[
                         { id: 1, name: 'Text Input', desc: 'Enter your description' },
-                        { id: 2, name: 'Image Ready', desc: 'Generated with Stable Diffusion' },
-                        { id: 3, name: 'Converting to 3D', desc: 'Processing with Trellis AI' },
-                        { id: 4, name: '3D Model Ready', desc: '3D model generation complete' }
+                        { id: 2, name: 'Text to Image', desc: 'Converting to image with Huanyuan AI' },
+                        { id: 3, name: 'Image Ready', desc: 'Image generation complete' }
                       ].map((step) => (
                         <div
                           key={step.id}
@@ -554,82 +513,7 @@ const Dashboard = () => {
                       <div className="aspect-square rounded-xl overflow-hidden bg-gray-100">
                         <img src={generatedImage} alt="Generated from text" className="w-full h-full object-cover" />
                       </div>
-                      <div className="mt-4 space-y-3">
-                        <p className="text-sm text-gray-500">Created with Stable Diffusion</p>
-                        
-                        {/* Convert to 3D Button */}
-                        {!generated3DModel && currentStep === 2 && (
-                          <button
-                            onClick={handleConvertTo3D}
-                            disabled={isProcessing}
-                            className="w-full py-3 px-6 bg-gradient-to-r from-[#8B0000] to-[#90EE90] text-white font-semibold rounded-xl hover:opacity-90 transition-all duration-200 disabled:opacity-50"
-                          >
-                            {isProcessing ? (
-                              <div className="flex items-center justify-center">
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                                Converting to 3D...
-                              </div>
-                            ) : (
-                              'Convert to 3D Model'
-                            )}
-                          </button>
-                        )}
-                        
-                        {/* Show conversion status */}
-                        {currentStep === 3 && !generated3DModel && (
-                          <div className="text-center py-4">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B0000] mx-auto mb-2"></div>
-                            <p className="text-sm text-gray-600">Converting image to 3D model with Trellis...</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {generated3DModel && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">3D Model</h3>
-                      <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-16 h-16 mx-auto mb-4 text-[#8B0000]">
-                            <svg fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                            </svg>
-                          </div>
-                          <p className="text-gray-700 font-medium mb-2">3D Model Ready!</p>
-                          <a 
-                            href={generated3DModel} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-[#8B0000] hover:underline text-sm"
-                          >
-                            Download 3D Model
-                          </a>
-                        </div>
-                      </div>
-                      <div className="mt-4 space-y-3">
-                        <p className="text-sm text-gray-500">Created with Trellis AI</p>
-                        <div className="flex space-x-3">
-                          <button 
-                            onClick={() => {
-                              setGeneratedImage('');
-                              setGenerated3DModel('');
-                              setCurrentStep(0);
-                              setInputText('');
-                            }}
-                            className="flex-1 py-2 px-4 bg-[#8B0000] text-white rounded-lg hover:bg-[#6B0000] transition-colors"
-                          >
-                            Create Another
-                          </button>
-                          <a 
-                            href={generated3DModel}
-                            download
-                            className="flex-1 py-2 px-4 border border-[#8B0000] text-[#8B0000] rounded-lg hover:bg-[#8B0000] hover:text-white transition-colors text-center"
-                          >
-                            Download Model
-                          </a>
-                        </div>
-                      </div>
+                      <p className="text-sm text-gray-500 mt-2">Created with Huanyuan AI</p>
                     </div>
                   )}
 
