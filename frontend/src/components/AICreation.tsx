@@ -125,10 +125,18 @@ const AICreation = () => {
     setWebhookStatus('idle');
     
     try {
+      console.log('=== STARTING CREATE PROCESS ===');
+      console.log('User:', user?.id);
+      console.log('Input text:', inputText.trim());
+      
       // Step 1: Create database record
+      console.log('Creating database record...');
       const { data: creation, error: dbError } = await aiCreationService.createCreation(user.id, inputText.trim());
       
+      console.log('Database response:', { creation, dbError });
+      
       if (dbError || !creation) {
+        console.error('Database error:', dbError);
         throw new Error(dbError?.message || 'Failed to create database record');
       }
       
@@ -136,6 +144,8 @@ const AICreation = () => {
       
       // Step 2: Text to Image (Huanyuan)
       setCurrentStep(2);
+      console.log('=== CALLING WEBHOOK ===');
+      console.log('About to call webhook with:', { text: inputText.trim(), creationId: creation.id });
       const huanyuanResponse = await callHuanyuanWebhook(inputText.trim(), creation.id);
       
       if (huanyuanResponse.success && huanyuanResponse.data?.image_url) {

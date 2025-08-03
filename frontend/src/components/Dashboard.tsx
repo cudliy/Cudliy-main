@@ -198,6 +198,56 @@ const Dashboard = () => {
     }
   };
 
+  // Call Huanyuan webhook for text-to-image generation
+  const callHuanyuanWebhook = async (text: string, creationId: string) => {
+    try {
+      console.log('=== DASHBOARD WEBHOOK DEBUG ===');
+      
+      // Hardcoded webhook URL
+      const webhookUrl = 'https://n8nprimary.cudliy.com/webhook-test/90d50690-98d2-4a24-a435-5e1e45d55fb2';
+      
+      // Create query parameters for GET request
+      const params = new URLSearchParams({
+        text: text,
+        creation_id: creationId,
+        user_id: user?.id || '',
+        timestamp: new Date().toISOString()
+      });
+      
+      console.log('Full URL with params:', `${webhookUrl}?${params}`);
+      
+      const response = await fetch(`${webhookUrl}?${params}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+
+      console.log('Response status:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Error response body:', errorText);
+        throw new Error(`Webhook failed: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('=== DASHBOARD WEBHOOK RESPONSE ===');
+      console.log('Success! Received:', result);
+      
+      return {
+        success: true,
+        data: result
+      };
+    } catch (error) {
+      console.error('Dashboard webhook error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  };
+
   const handleAICreation = async () => {
     if (!inputText.trim() || !user) return;
     
@@ -205,11 +255,18 @@ const Dashboard = () => {
     setCurrentStep(1);
     
     try {
+      console.log('=== DASHBOARD STARTING CREATE PROCESS ===');
+      console.log('User:', user?.id);
+      console.log('Input text:', inputText.trim());
+      
       // Create record in Supabase
+      console.log('Creating database record...');
       const { data: newCreation, error: creationError } = await aiCreationService.createCreation(
         user.id,
         inputText
       );
+      
+      console.log('Database response:', { newCreation, creationError });
       
       if (creationError) {
         console.error('Failed to create record:', creationError);
@@ -220,26 +277,25 @@ const Dashboard = () => {
       
       // Step 2: Text to Image (Huanyuan)
       setCurrentStep(2);
-      const huanyuanResponse = await simulateWebhook();
-      setGeneratedImage(huanyuanResponse.data.image_url);
+      console.log('=== DASHBOARD CALLING WEBHOOK ===');
+      const huanyuanResponse = await callHuanyuanWebhook(inputText.trim(), newCreation.id);
+      
+      if (huanyuanResponse.success && huanyuanResponse.data?.image_url) {
+        setGeneratedImage(huanyuanResponse.data.image_url);
+      } else {
+        console.error('Webhook failed:', huanyuanResponse.error);
+        // Fallback to placeholder
+        setGeneratedImage('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOEIwMDAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkZhaWxlZDwvdGV4dD48L3N2Zz4=');
+      }
       
       // Update Supabase with image
-      if (newCreation) {
+      if (newCreation && huanyuanResponse.data?.image_url) {
         await aiCreationService.updateWithImage(newCreation.id, huanyuanResponse.data.image_url);
       }
       
-      // Step 3: Image to 3D (Trellis)
+      // For now, we're only doing text-to-image (not 3D conversion)
+      // Step 3: Complete
       setCurrentStep(3);
-      const trellisResponse = await simulateWebhook();
-      setGenerated3D(trellisResponse.data.model_url);
-      
-      // Update Supabase with 3D model
-      if (newCreation) {
-        await aiCreationService.updateWith3DModel(newCreation.id, trellisResponse.data.model_url);
-      }
-      
-      // Step 4: Complete
-      setCurrentStep(4);
       
     } catch (error) {
       console.error('Creation failed:', error);
