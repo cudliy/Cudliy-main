@@ -52,13 +52,25 @@ const AICreation = () => {
     try {
       setWebhookStatus('sending');
       
-      const webhookUrl = import.meta.env.VITE_HUANYUAN_WEBHOOK_URL || 'https://n8nprimary.cudliy.com/webhook-test/90d50690-98d2-4a24-a435-5e1e45d55fb2';
+      // Hardcoded webhook URL
+      const webhookUrl = 'https://n8nprimary.cudliy.com/webhook-test/90d50690-98d2-4a24-a435-5e1e45d55fb2';
       
       // Create query parameters for GET request
       const params = new URLSearchParams({
         text: text,
         creation_id: creationId,
         user_id: user?.id || '',
+        timestamp: new Date().toISOString()
+      });
+      
+      // Debug: Log what we're sending
+      console.log('=== WEBHOOK DEBUG ===');
+      console.log('URL:', webhookUrl);
+      console.log('Full URL with params:', `${webhookUrl}?${params}`);
+      console.log('Sending data:', {
+        text: text,
+        creation_id: creationId,
+        user_id: user?.id,
         timestamp: new Date().toISOString()
       });
       
@@ -69,15 +81,24 @@ const AICreation = () => {
         }
       });
 
+      console.log('Response status:', response.status, response.statusText);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (!response.ok) {
-        throw new Error(`Webhook failed: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.log('Error response body:', errorText);
+        throw new Error(`Webhook failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
       setWebhookStatus('success');
       
-    return {
-      success: true,
+      // Debug: Log the webhook response
+      console.log('=== WEBHOOK RESPONSE ===');
+      console.log('Success! Received:', result);
+      
+      return {
+        success: true,
         data: result
       };
     } catch (error) {
