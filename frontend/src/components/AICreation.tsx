@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { aiCreationService } from '../services/aiCreationService';
+import { webhookService } from '../services/webhookService';
 
 const AICreation = () => {
   const { user } = useAuth();
@@ -15,9 +16,9 @@ const AICreation = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const steps = [
-    { id: 1, name: 'Text Input', status: 'pending' },
-    { id: 2, name: 'Text to Image', status: 'pending' },
-    { id: 3, name: 'Image Ready', status: 'pending' }
+    { id: 1, name: 'Text Input', desc: 'Enter your description' },
+    { id: 2, name: 'Text to Image', desc: 'Converting to image with Huanyuan AI' },
+    { id: 3, name: 'Image Ready', desc: 'Image generation complete' }
   ];
 
   useEffect(() => {
@@ -47,71 +48,7 @@ const AICreation = () => {
     }
   };
 
-  // Call Huanyuan webhook for text-to-image generation
-  const callHuanyuanWebhook = async (text: string, creationId: string) => {
-    try {
-      setWebhookStatus('sending');
-      
-      // Hardcoded webhook URL
-      const webhookUrl = 'https://n8nprimary.cudliy.com/webhook-test/90d50690-98d2-4a24-a435-5e1e45d55fb2';
-      
-      // Create query parameters for GET request
-      const params = new URLSearchParams({
-        text: text,
-        creation_id: creationId,
-        user_id: user?.id || '',
-        timestamp: new Date().toISOString()
-      });
-      
-      // Debug: Log what we're sending
-      console.log('=== WEBHOOK DEBUG ===');
-      console.log('URL:', webhookUrl);
-      console.log('Full URL with params:', `${webhookUrl}?${params}`);
-      console.log('Sending data:', {
-        text: text,
-        creation_id: creationId,
-        user_id: user?.id,
-        timestamp: new Date().toISOString()
-      });
-      
-      const response = await fetch(`${webhookUrl}?${params}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
 
-      console.log('Response status:', response.status, response.statusText);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log('Error response body:', errorText);
-        throw new Error(`Webhook failed: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-
-      const result = await response.json();
-      setWebhookStatus('success');
-      
-      // Debug: Log the webhook response
-      console.log('=== WEBHOOK RESPONSE ===');
-      console.log('Success! Received:', result);
-      
-      return {
-        success: true,
-        data: result
-      };
-    } catch (error) {
-      console.error('Webhook error:', error);
-      setWebhookStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to connect to Huanyuan service');
-      
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
-    }
-  };
 
   const handleCreate = async () => {
     if (!inputText.trim() || !user) {
@@ -144,11 +81,22 @@ const AICreation = () => {
       
       // Step 2: Text to Image (Huanyuan)
       setCurrentStep(2);
+      setWebhookStatus('sending');
       console.log('=== CALLING WEBHOOK ===');
       console.log('About to call webhook with:', { text: inputText.trim(), creationId: creation.id });
-      const huanyuanResponse = await callHuanyuanWebhook(inputText.trim(), creation.id);
+      
+      const webhookRequest = {
+        text: inputText.trim(),
+        creation_id: creation.id,
+        user_id: user.id,
+        timestamp: new Date().toISOString()
+      };
+      
+      const huanyuanResponse = await webhookService.callHuanyuanWebhook(webhookRequest);
       
       if (huanyuanResponse.success && huanyuanResponse.data?.image_url) {
+        setWebhookStatus('success');
+        
         // Update database with image URL
         const { error: updateError } = await aiCreationService.updateWithImage(
           creation.id, 
@@ -162,6 +110,8 @@ const AICreation = () => {
         setGeneratedImage(huanyuanResponse.data.image_url);
         setCurrentStep(3); // Image Ready
       } else {
+        setWebhookStatus('error');
+        setErrorMessage(huanyuanResponse.error || 'Failed to generate image');
         throw new Error(huanyuanResponse.error || 'Failed to generate image');
       }
       
@@ -189,8 +139,8 @@ const AICreation = () => {
           <div className="mx-auto h-16 w-16 mb-4 floating-animation">
             <img src="/Main Brand ICON.svg" alt="Cudliy Logo" className="h-full w-full" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">AI-Powered 3D Creation</h1>
-          <p className="text-lg text-gray-600">Describe what you want, and we'll create it for you</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">AI-Powered Image Generation</h1>
+          <p className="text-lg text-gray-600">Describe what you want, and we'll generate an image for you</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -232,10 +182,10 @@ const AICreation = () => {
                   {isProcessing ? (
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Creating your 3D model...
+                      Generating image...
                     </div>
                   ) : (
-                    'Create 3D Model'
+                    'Generate Image'
                   )}
                 </button>
               </div>
@@ -259,11 +209,7 @@ const AICreation = () => {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">{step.name}</h4>
-                      <p className="text-sm text-gray-600">
-                        {step.id === 1 && 'Enter your description'}
-                        {step.id === 2 && 'Converting to image with Huanyuan'}
-                        {step.id === 3 && 'Image generation complete'}
-                      </p>
+                      <p className="text-sm text-gray-600">{step.desc}</p>
                     </div>
                     {step.id === currentStep && isProcessing && (
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#8B0000] border-t-transparent"></div>
@@ -326,7 +272,7 @@ const AICreation = () => {
                       onClick={resetForm}
                       className="flex-1 py-2 px-4 bg-[#8B0000] text-white rounded-lg hover:bg-[#6B0000] transition-colors"
                     >
-                      Create Another
+                      Generate Another
                     </button>
                     <button className="flex-1 py-2 px-4 border border-[#8B0000] text-[#8B0000] rounded-lg hover:bg-[#8B0000] hover:text-white transition-colors">
                       Save Image

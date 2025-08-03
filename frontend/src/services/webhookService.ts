@@ -17,13 +17,27 @@ export const webhookService = {
   // Call Huanyuan webhook for text-to-image generation
   async callHuanyuanWebhook(request: WebhookRequest): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
-      const response = await fetch('https://n8nprimary.cudliy.com/webhook-test/textimage', {
+      // Use the same URL as in AICreation.tsx for consistency
+      const webhookUrl = 'https://n8nprimary.cudliy.com/webhook-test/testimage';
+      
+      // Create query parameters for GET request to match n8n workflow expectations
+      const params = new URLSearchParams({
+        text: request.text,
+        creation_id: request.creation_id,
+        user_id: request.user_id,
+        timestamp: request.timestamp
+      });
+      
+      console.log('=== WEBHOOK SERVICE DEBUG ===');
+      console.log('URL:', webhookUrl);
+      console.log('Full URL with params:', `${webhookUrl}?${params}`);
+      console.log('Request data:', request);
+      
+      const response = await fetch(`${webhookUrl}?${params}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
-        },
-        body: JSON.stringify(request)
+        }
       });
 
       // Check if the response is ok
@@ -35,9 +49,18 @@ export const webhookService = {
       let result;
       try {
         result = await response.json();
+        
+        // Debug: Log the actual response we got
+        console.log('=== WEBHOOK RESPONSE DEBUG ===');
+        console.log('Raw response:', result);
+        console.log('Image URL:', result?.image_url || 'NO IMAGE URL FOUND');
+        console.log('Success:', result?.success);
+        
       } catch (parseError) {
         // If JSON parsing fails, try to get text response
         const textResponse = await response.text();
+        console.log('JSON Parse Error:', parseError);
+        console.log('Raw text response:', textResponse);
         throw new Error(`Invalid JSON response: ${textResponse}`);
       }
 

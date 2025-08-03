@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { aiCreationService } from '../services/aiCreationService';
+import { webhookService } from '../services/webhookService';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -12,9 +13,9 @@ const Dashboard = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [generatedImage, setGeneratedImage] = useState('');
-  const [generated3D, setGenerated3D] = useState('');
+
   const [recognition, setRecognition] = useState<any>(null);
-  const [creation, setCreation] = useState<any>(null);
+
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordingInterval, setRecordingInterval] = useState<NodeJS.Timeout | null>(null);
 
@@ -150,103 +151,11 @@ const Dashboard = () => {
     }
   };
 
-  const simulateWebhook = async () => {
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
-    return {
-      success: true,
-      data: {
-        image_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOEIwMDAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFJIEdlbmVyYXRlZDwvdGV4dD48L3N2Zz4=',
-        model_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMkY0RjJGIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjNEIE1vZGVsPC90ZXh0Pjwvc3ZnPg=='
-      }
-    };
-  };
 
-  const handleStripePayment = async (creationId: string, productName: string, price: number) => {
-    try {
-      // Simulate Stripe payment webhook
-      const response = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: price * 100, // Convert to cents
-          currency: 'usd',
-          metadata: {
-            creation_id: creationId,
-            product_name: productName,
-            user_id: user?.id
-          }
-        })
-      });
 
-      await response.json();
-      
-      // In a real implementation, you would use Stripe.js to confirm the payment
-      // For now, we'll simulate a successful payment
-      console.log('Payment successful for creation:', creationId);
-      
-      // Add to print queue after successful payment
-      if (user) {
-        await aiCreationService.addToPrintQueue(user.id, creationId, productName);
-      }
-      
-      return { success: true };
-    } catch (error) {
-      console.error('Payment failed:', error);
-      return { success: false, error };
-    }
-  };
 
-  // Call Huanyuan webhook for text-to-image generation
-  const callHuanyuanWebhook = async (text: string, creationId: string) => {
-    try {
-      console.log('=== DASHBOARD WEBHOOK DEBUG ===');
-      
-      // Hardcoded webhook URL
-      const webhookUrl = 'https://n8nprimary.cudliy.com/webhook-test/90d50690-98d2-4a24-a435-5e1e45d55fb2';
-      
-      // Create query parameters for GET request
-      const params = new URLSearchParams({
-        text: text,
-        creation_id: creationId,
-        user_id: user?.id || '',
-        timestamp: new Date().toISOString()
-      });
-      
-      console.log('Full URL with params:', `${webhookUrl}?${params}`);
-      
-      const response = await fetch(`${webhookUrl}?${params}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
 
-      console.log('Response status:', response.status, response.statusText);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log('Error response body:', errorText);
-        throw new Error(`Webhook failed: ${response.status} ${response.statusText} - ${errorText}`);
-      }
 
-      const result = await response.json();
-      console.log('=== DASHBOARD WEBHOOK RESPONSE ===');
-      console.log('Success! Received:', result);
-      
-      return {
-        success: true,
-        data: result
-      };
-    } catch (error) {
-      console.error('Dashboard webhook error:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
-    }
-  };
 
   const handleAICreation = async () => {
     if (!inputText.trim() || !user) return;
@@ -273,12 +182,20 @@ const Dashboard = () => {
         return;
       }
       
-      setCreation(newCreation);
+
       
       // Step 2: Text to Image (Huanyuan)
       setCurrentStep(2);
       console.log('=== DASHBOARD CALLING WEBHOOK ===');
-      const huanyuanResponse = await callHuanyuanWebhook(inputText.trim(), newCreation.id);
+      
+      const webhookRequest = {
+        text: inputText.trim(),
+        creation_id: newCreation?.id || '',
+        user_id: user.id,
+        timestamp: new Date().toISOString()
+      };
+      
+      const huanyuanResponse = await webhookService.callHuanyuanWebhook(webhookRequest);
       
       if (huanyuanResponse.success && huanyuanResponse.data?.image_url) {
         setGeneratedImage(huanyuanResponse.data.image_url);
@@ -289,7 +206,7 @@ const Dashboard = () => {
       }
       
       // Update Supabase with image
-      if (newCreation && huanyuanResponse.data?.image_url) {
+      if (newCreation?.id && huanyuanResponse.data?.image_url) {
         await aiCreationService.updateWithImage(newCreation.id, huanyuanResponse.data.image_url);
       }
       
@@ -471,7 +388,7 @@ const Dashboard = () => {
           <div className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-hide">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">AI-Powered 3D Creation</h2>
+                <h2 className="text-2xl font-bold text-gray-900">AI-Powered Image Generation</h2>
                 <button
                   onClick={() => setShowAICreation(false)}
                   className="p-2 text-gray-400 hover:text-gray-600"
@@ -546,10 +463,10 @@ const Dashboard = () => {
                         {isProcessing ? (
                           <div className="flex items-center justify-center">
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                            Creating your 3D model...
+                            Generating image...
                           </div>
                         ) : (
-                          'Create 3D Model'
+                          'Generate Image'
                         )}
                       </button>
                     </div>
@@ -561,9 +478,8 @@ const Dashboard = () => {
                     <div className="space-y-3">
                       {[
                         { id: 1, name: 'Text Input', desc: 'Enter your description' },
-                        { id: 2, name: 'Text to Image', desc: 'Converting to image with Huanyuan' },
-                        { id: 3, name: 'Image to 3D', desc: 'Converting to 3D with Trellis' },
-                        { id: 4, name: 'Ready for Print', desc: '3D model ready' }
+                        { id: 2, name: 'Text to Image', desc: 'Converting to image with Huanyuan AI' },
+                        { id: 3, name: 'Image Ready', desc: 'Image generation complete' }
                       ].map((step) => (
                         <div
                           key={step.id}
@@ -601,30 +517,9 @@ const Dashboard = () => {
                     </div>
                   )}
 
-                  {generated3D && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">3D Model Ready</h3>
-                      <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                        <img src={generated3D} alt="3D model" className="w-full h-full object-cover" />
-                      </div>
-                      <div className="mt-4 space-y-3">
-                        <p className="text-sm text-gray-500">Created with Trellis AI</p>
-                        <div className="flex space-x-3">
-                          <button className="flex-1 py-2 px-4 bg-[#8B0000] text-white rounded-lg hover:bg-[#6B0000] transition-colors">
-                            Download 3D Model
-                          </button>
-                          <button 
-                            onClick={() => handleStripePayment(creation?.id || '', 'Custom 3D Model', 50)}
-                            className="flex-1 py-2 px-4 border border-[#8B0000] text-[#8B0000] rounded-lg hover:bg-[#8B0000] hover:text-white transition-colors"
-                          >
-                            Purchase & Print ($50)
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
-                  {!generatedImage && !generated3D && (
+
+                  {!generatedImage && (
                     <div className="text-center py-12">
                       <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
