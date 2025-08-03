@@ -53,17 +53,20 @@ const AICreation = () => {
       setWebhookStatus('sending');
       
       const webhookUrl = import.meta.env.VITE_HUANYUAN_WEBHOOK_URL || 'https://n8nprimary.cudliy.com/webhook-test/90d50690-98d2-4a24-a435-5e1e45d55fb2';
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
+      
+      // Create query parameters for GET request
+      const params = new URLSearchParams({
+        text: text,
+        creation_id: creationId,
+        user_id: user?.id || '',
+        timestamp: new Date().toISOString()
+      });
+      
+      const response = await fetch(`${webhookUrl}?${params}`, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: text,
-          creation_id: creationId,
-          user_id: user?.id,
-          timestamp: new Date().toISOString()
-        })
+          'Accept': 'application/json',
+        }
       });
 
       if (!response.ok) {
