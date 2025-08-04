@@ -3,6 +3,32 @@ import { useAuth } from '../contexts/AuthContext';
 import { aiCreationService } from '../services/aiCreationService';
 import { webhookService } from '../services/webhookService';
 
+// Extend JSX namespace for model-viewer
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'model-viewer': {
+        src: string;
+        alt: string;
+        'auto-rotate'?: string;
+        'camera-controls'?: string;
+        loading?: string;
+        style?: React.CSSProperties;
+        'shadow-intensity'?: string;
+        'environment-image'?: string;
+        exposure?: string;
+        ar?: string;
+        'ar-modes'?: string;
+        'camera-orbit'?: string;
+        'min-camera-orbit'?: string;
+        'max-camera-orbit'?: string;
+        'field-of-view'?: string;
+        children?: React.ReactNode;
+      };
+    }
+  }
+}
+
 const Dashboard = () => {
   const { user, signOut } = useAuth();
 
@@ -15,6 +41,7 @@ const Dashboard = () => {
   const [generatedImage, setGeneratedImage] = useState('');
   const [generated3DModel, setGenerated3DModel] = useState('');
   const [creationId, setCreationId] = useState<string | null>(null);
+  const [modelViewerLoaded, setModelViewerLoaded] = useState(false);
 
   const [recognition, setRecognition] = useState<any>(null);
 
@@ -113,6 +140,35 @@ const Dashboard = () => {
       }
     };
   }, [recordingInterval]);
+
+  // Load model-viewer web component
+  useEffect(() => {
+    const loadModelViewer = async () => {
+      try {
+        // Check if model-viewer is already loaded
+        if (customElements.get('model-viewer')) {
+          setModelViewerLoaded(true);
+          return;
+        }
+
+        // Load model-viewer script
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/@google/model-viewer@^3.4.0/dist/model-viewer.min.js';
+        script.type = 'module';
+        script.onload = () => {
+          setModelViewerLoaded(true);
+        };
+        script.onerror = () => {
+          console.error('Failed to load model-viewer');
+        };
+        document.head.appendChild(script);
+      } catch (error) {
+        console.error('Error loading model-viewer:', error);
+      }
+    };
+
+    loadModelViewer();
+  }, []);
 
   const startListening = () => {
     if (recognition) {
@@ -589,23 +645,62 @@ const Dashboard = () => {
                   {generated3DModel && (
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">3D Model</h3>
-                      <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-16 h-16 mx-auto mb-4 text-[#8B0000]">
-                            <svg fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                            </svg>
+                      <div className="aspect-square rounded-xl overflow-hidden bg-gray-100">
+                        {/* 3D Model Viewer */}
+                        {generated3DModel.includes('.obj') || generated3DModel.includes('.glb') || generated3DModel.includes('.gltf') ? (
+                          modelViewerLoaded ? (
+                            <div style={{ width: '100%', height: '100%' }}>
+                              <model-viewer
+                                src={generated3DModel}
+                                alt="Generated 3D Model"
+                                auto-rotate="true"
+                                camera-controls="true"
+                                loading="lazy"
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  backgroundColor: '#f3f4f6'
+                                }}
+                                shadow-intensity="1"
+                                environment-image="neutral"
+                                exposure="1"
+                                ar="true"
+                                ar-modes="webxr scene-viewer quick-look"
+                                camera-orbit="0deg 75deg 105%"
+                                min-camera-orbit="auto auto 50%"
+                                max-camera-orbit="auto auto 150%"
+                                field-of-view="30deg"
+                              >
+                                <div className="model-viewer-loading">
+                                  <div className="flex items-center justify-center h-full">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B0000]"></div>
+                                    <span className="ml-2 text-sm text-gray-600">Loading 3D Model...</span>
+                                  </div>
+                                </div>
+                              </model-viewer>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center h-full">
+                              <div className="text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B0000] mx-auto mb-4"></div>
+                                <p className="text-sm text-gray-600">Loading 3D Viewer...</p>
+                              </div>
+                            </div>
+                          )
+                        ) : (
+                          /* Fallback for unsupported formats */
+                          <div className="flex items-center justify-center h-full">
+                            <div className="text-center">
+                              <div className="w-16 h-16 mx-auto mb-4 text-[#8B0000]">
+                                <svg fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                </svg>
+                              </div>
+                              <p className="text-gray-700 font-medium mb-2">3D Model Ready!</p>
+                              <p className="text-sm text-gray-500">Format not supported for preview</p>
+                            </div>
                           </div>
-                          <p className="text-gray-700 font-medium mb-2">3D Model Ready!</p>
-                          <a 
-                            href={generated3DModel} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-[#8B0000] hover:underline text-sm"
-                          >
-                            Download 3D Model
-                          </a>
-                        </div>
+                        )}
                       </div>
                       <div className="mt-4 space-y-3">
                         <p className="text-sm text-gray-500">Created with Trellis AI</p>

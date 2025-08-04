@@ -358,23 +358,36 @@ const AICreation = () => {
             {generated3DModel && (
               <div className="bg-white rounded-2xl card-shadow p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">3D Model</h3>
-                <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 text-[#8B0000]">
-                      <svg fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                      </svg>
+                <div className="aspect-square rounded-xl overflow-hidden bg-gray-100">
+                  {/* 3D Model Viewer */}
+                  {generated3DModel.includes('.obj') || generated3DModel.includes('.glb') || generated3DModel.includes('.gltf') ? (
+                    <div 
+                      dangerouslySetInnerHTML={{
+                        __html: `<model-viewer
+                          src="${generated3DModel}"
+                          alt="Generated 3D Model"
+                          auto-rotate
+                          camera-controls
+                          style="width: 100%; height: 100%;"
+                          loading="lazy">
+                        </model-viewer>`
+                      }}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  ) : (
+                    /* Fallback for unsupported formats */
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <div className="w-16 h-16 mx-auto mb-4 text-[#8B0000]">
+                          <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                          </svg>
+                        </div>
+                        <p className="text-gray-700 font-medium mb-2">3D Model Ready!</p>
+                        <p className="text-sm text-gray-500">Click download to view model</p>
+                      </div>
                     </div>
-                    <p className="text-gray-700 font-medium mb-2">3D Model Ready!</p>
-                    <a 
-                      href={generated3DModel} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-[#8B0000] hover:underline text-sm"
-                    >
-                      Download 3D Model
-                    </a>
-                  </div>
+                  )}
                 </div>
                 <div className="mt-4 space-y-3">
                   <p className="text-sm text-gray-500">Created with Trellis AI</p>
