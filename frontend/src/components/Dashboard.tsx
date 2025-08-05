@@ -1,33 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { aiCreationService } from '../services/aiCreationService';
 import { webhookService } from '../services/webhookService';
-
-// Extend JSX namespace for model-viewer
-declare module 'react' {
-  namespace JSX {
-    interface IntrinsicElements {
-      'model-viewer': {
-        src: string;
-        alt: string;
-        'auto-rotate'?: string;
-        'camera-controls'?: string;
-        loading?: string;
-        style?: React.CSSProperties;
-        'shadow-intensity'?: string;
-        'environment-image'?: string;
-        exposure?: string;
-        ar?: string;
-        'ar-modes'?: string;
-        'camera-orbit'?: string;
-        'min-camera-orbit'?: string;
-        'max-camera-orbit'?: string;
-        'field-of-view'?: string;
-        children?: React.ReactNode;
-      };
-    }
-  }
-}
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -42,6 +16,7 @@ const Dashboard = () => {
   const [generated3DModel, setGenerated3DModel] = useState('');
   const [creationId, setCreationId] = useState<string | null>(null);
   const [modelViewerLoaded, setModelViewerLoaded] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [recognition, setRecognition] = useState<any>(null);
 
@@ -275,11 +250,13 @@ const Dashboard = () => {
   const handleConvertTo3D = async () => {
     if (!generatedImage || !creationId || !user) {
       console.error('Missing image or user data for 3D conversion');
+      setErrorMessage('Missing image or user data for 3D conversion');
       return;
     }
 
     setIsProcessing(true);
     setCurrentStep(3);
+    setErrorMessage(''); // Clear any previous errors
 
     try {
       console.log('=== DASHBOARD CALLING 3D WEBHOOK ===');
@@ -309,9 +286,11 @@ const Dashboard = () => {
         }
       } else {
         console.warn('3D conversion did not return a model URL:', trellisResponse);
+        setErrorMessage(trellisResponse.error || '3D conversion failed. Please try again.');
       }
     } catch (trellisError) {
       console.error('3D conversion error:', trellisError);
+      setErrorMessage(trellisError instanceof Error ? trellisError.message : 'Failed to convert image to 3D model. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -600,6 +579,29 @@ const Dashboard = () => {
                       ))}
                     </div>
                   </div>
+
+                  {/* Error Display */}
+                  {errorMessage && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-red-800">Error</h4>
+                          <p className="text-sm text-red-700 mt-1">{errorMessage}</p>
+                          <button
+                            onClick={() => setErrorMessage('')}
+                            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Results Section */}
@@ -670,11 +672,16 @@ const Dashboard = () => {
                                 min-camera-orbit="auto auto 50%"
                                 max-camera-orbit="auto auto 150%"
                                 field-of-view="30deg"
+                                interaction-prompt="auto"
+                                interaction-prompt-style="basic"
+                                camera-target="0m 0m 0m"
+                                min-field-of-view="10deg"
+                                max-field-of-view="45deg"
                               >
-                                <div className="model-viewer-loading">
-                                  <div className="flex items-center justify-center h-full">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B0000]"></div>
-                                    <span className="ml-2 text-sm text-gray-600">Loading 3D Model...</span>
+                                <div slot="poster" className="flex items-center justify-center h-full">
+                                  <div className="text-center">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B0000] mx-auto mb-4"></div>
+                                    <span className="text-sm text-gray-600">Loading 3D Model...</span>
                                   </div>
                                 </div>
                               </model-viewer>
@@ -687,6 +694,36 @@ const Dashboard = () => {
                               </div>
                             </div>
                           )
+                        ) : generated3DModel.includes('.mp4') || generated3DModel.includes('.mov') || generated3DModel.includes('.avi') ? (
+                          /* Video format support */
+                          <div style={{ width: '100%', height: '100%' }}>
+                            <video
+                              src={generated3DModel}
+                              controls
+                              autoPlay
+                              loop
+                              muted
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                backgroundColor: '#f3f4f6',
+                                borderRadius: '8px'
+                              }}
+                            >
+                              <div className="flex items-center justify-center h-full">
+                                <div className="text-center">
+                                  <div className="w-16 h-16 mx-auto mb-4 text-[#8B0000]">
+                                    <svg fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                  </div>
+                                  <p className="text-gray-700 font-medium mb-2">Video Ready!</p>
+                                  <p className="text-sm text-gray-500">Your video is ready for preview</p>
+                                </div>
+                              </div>
+                            </video>
+                          </div>
                         ) : (
                           /* Fallback for unsupported formats */
                           <div className="flex items-center justify-center h-full">
@@ -698,6 +735,7 @@ const Dashboard = () => {
                               </div>
                               <p className="text-gray-700 font-medium mb-2">3D Model Ready!</p>
                               <p className="text-sm text-gray-500">Format not supported for preview</p>
+                              <p className="text-xs text-gray-400 mt-1">Supported: OBJ, GLB, GLTF, MP4, MOV, AVI</p>
                             </div>
                           </div>
                         )}

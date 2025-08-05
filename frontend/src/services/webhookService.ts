@@ -83,8 +83,8 @@ export const webhookService = {
   // Call webhook for image-to-3D generation (Trellis)
   async callImageTo3DWebhook(imageUrl: string, creationId: string, userId: string): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
-      // 3D workflow webhook URL
-      const webhookUrl = 'https://n8nprimary.cudliy.com/webhook-test/3dworkflow';
+             // 3D workflow webhook URL
+       const webhookUrl = 'https://n8nprimary.cudliy.com/webhook-test/3dworkflow';
       
       // Create query parameters for GET request
       const params = new URLSearchParams({
@@ -94,46 +94,73 @@ export const webhookService = {
         timestamp: new Date().toISOString()
       });
       
-      console.log('=== 3D WEBHOOK SERVICE DEBUG ===');
-      console.log('URL:', webhookUrl);
-      console.log('Full URL with params:', `${webhookUrl}?${params}`);
-      console.log('Sending image URL:', imageUrl);
+             console.log('=== 3D WEBHOOK SERVICE DEBUG ===');
+       console.log('URL:', webhookUrl);
+       console.log('Full URL with params:', `${webhookUrl}?${params}`);
+       console.log('Sending image URL:', imageUrl);
       
-      const response = await fetch(`${webhookUrl}?${params}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-
-      // Check if the response is ok
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      // Try to parse JSON response
-      let result;
+             // Add timeout and retry logic
+       const controller = new AbortController();
+       const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+      
       try {
-        result = await response.json();
+        const response = await fetch(`${webhookUrl}?${params}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal
+        });
         
-        // Debug: Log the actual response we got
-        console.log('=== 3D WEBHOOK RESPONSE DEBUG ===');
-        console.log('Raw response:', result);
-        console.log('3D Model URL:', result?.model_url || 'NO MODEL URL');
-        console.log('Success:', result?.success);
-        
-      } catch (parseError) {
-        // If JSON parsing fails, try to get text response
-        const textResponse = await response.text();
-        console.log('JSON Parse Error:', parseError);
-        console.log('Raw text response:', textResponse);
-        throw new Error(`Invalid JSON response: ${textResponse}`);
-      }
+        clearTimeout(timeoutId);
 
-      return {
-        success: true,
-        data: result
-      };
+        // Check if the response is ok
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Webhook response not ok:', response.status, response.statusText, errorText);
+          throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+        }
+
+        // Try to parse JSON response
+        let result;
+        try {
+          result = await response.json();
+          
+          // Debug: Log the actual response we got
+          console.log('=== 3D WEBHOOK RESPONSE DEBUG ===');
+          console.log('Raw response:', result);
+          console.log('3D Model URL:', result?.model_url || 'NO MODEL URL');
+          console.log('Success:', result?.success);
+          
+        } catch (parseError) {
+          // If JSON parsing fails, try to get text response
+          const textResponse = await response.text();
+          console.log('JSON Parse Error:', parseError);
+          console.log('Raw text response:', textResponse);
+          throw new Error(`Invalid JSON response: ${textResponse}`);
+        }
+
+        return {
+          success: true,
+          data: result
+        };
+             } catch (fetchError: unknown) {
+         clearTimeout(timeoutId);
+         
+         if (fetchError instanceof Error) {
+           if (fetchError.name === 'AbortError') {
+             throw new Error('Webhook request timed out after 5 minutes');
+           }
+           
+           // Check if it's a network error
+           if (fetchError.message.includes('Failed to fetch') || fetchError.message.includes('NetworkError')) {
+             throw new Error(`Network error: Unable to reach webhook server at ${webhookUrl}. Please check your internet connection and try again.`);
+           }
+         }
+         
+         throw fetchError;
+       }
     } catch (error) {
       console.error('3D webhook error:', error);
       
