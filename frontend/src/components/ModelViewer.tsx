@@ -15,7 +15,6 @@ interface ModelViewerProps {
   showControls?: boolean;
   backgroundColor?: string;
   shadowIntensity?: number;
-  exposure?: number;
   onLoad?: () => void;
   onError?: (error: string) => void;
 }
@@ -32,7 +31,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
   showControls = true,
   backgroundColor = "#f3f4f6",
   shadowIntensity = 1,
-  exposure = 1,
+
   onLoad,
   onError
 }) => {
@@ -247,6 +246,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
           }
         `}
       </style>
+      {/* @ts-ignore */}
       <model-viewer
         ref={modelViewerRef}
         src={modelUrl}
@@ -283,7 +283,8 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
             <div className="bg-[#8B0000] h-2 rounded-full transition-all duration-300"></div>
           </div>
         </div>
-      </model-viewer>
+              {/* @ts-ignore */}
+        </model-viewer>
       
       {/* Dark overlay to cover red underline */}
       <div 

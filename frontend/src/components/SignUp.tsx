@@ -315,7 +315,7 @@ const SignUpPage = () => {
           showControls={false}
           backgroundColor="transparent"
           shadowIntensity={0.8}
-          exposure={1.2}
+
           loadingMessage="Loading Cudliy Experience..."
           errorMessage="Failed to load 3D model"
           className="w-full h-full"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { aiCreationService } from '../services/aiCreationService';
 import { webhookService } from '../services/webhookService';
@@ -652,6 +652,7 @@ const Dashboard = () => {
                         {generated3DModel.includes('.obj') || generated3DModel.includes('.glb') || generated3DModel.includes('.gltf') ? (
                           modelViewerLoaded ? (
                             <div style={{ width: '100%', height: '100%' }}>
+                              {/* @ts-ignore */}
                               <model-viewer
                                 src={generated3DModel}
                                 alt="Generated 3D Model"
@@ -684,6 +685,7 @@ const Dashboard = () => {
                                     <span className="text-sm text-gray-600">Loading 3D Model...</span>
                                   </div>
                                 </div>
+                              {/* @ts-ignore */}
                               </model-viewer>
                             </div>
                           ) : (

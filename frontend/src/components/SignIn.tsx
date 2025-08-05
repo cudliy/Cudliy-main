@@ -43,27 +43,7 @@ const SignInPage = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) {
-        if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
-          setToastMessage('Too many requests. Please wait an hour before trying again.');
-        } else {
-          setToastMessage(error.message);
-        }
-        setToastType('error');
-        setShowToast(true);
-      }
-    } catch (err) {
-      setToastMessage('An unexpected error occurred');
-      setToastType('error');
-      setShowToast(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   return (
     <div 
@@ -279,22 +259,21 @@ const SignInPage = () => {
            background: '#000000'
          }}
        >
-        <ModelViewer
-          modelUrl="/output (8).glb"
-          alt="Cudliy 3D Model"
-          autoRotate={true}
-          cameraControls={true}
-          showControls={false}
-          backgroundColor="transparent"
-          shadowIntensity={0.8}
-          exposure={1.2}
-          loadingMessage="Loading Cudliy Experience..."
-          errorMessage="Failed to load 3D model"
-          className="w-full h-full"
-          style={{ width: '100%', height: '100%' }}
-          onLoad={() => console.log('3D model loaded successfully')}
-          onError={(error) => console.error('3D model error:', error)}
-        />
+                 <ModelViewer
+           modelUrl="/output (8).glb"
+           alt="Cudliy 3D Model"
+           autoRotate={true}
+           cameraControls={true}
+           showControls={false}
+           backgroundColor="transparent"
+           shadowIntensity={0.8}
+           loadingMessage="Loading Cudliy Experience..."
+           errorMessage="Failed to load 3D model"
+           className="w-full h-full"
+           style={{ width: '100%', height: '100%' }}
+           onLoad={() => console.log('3D model loaded successfully')}
+           onError={(error) => console.error('3D model error:', error)}
+         />
       </div>
     </div>
   );
