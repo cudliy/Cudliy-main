@@ -302,19 +302,19 @@ const Dashboard = () => {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <img src="/MAIN Logo.svg" alt="Cudliy" className="h-8" />
-              <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <img src="/MAIN Logo.svg" alt="Cudliy" className="h-6 md:h-8" />
+              <h1 className="text-lg md:text-xl font-bold text-gray-900">Dashboard</h1>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <button className="p-2 text-gray-400 hover:text-gray-500">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5z" />
                 </svg>
               </button>
               <div className="flex items-center space-x-2">
-                <img className="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
-                <span className="text-sm font-medium text-gray-700">
+                <img className="h-6 w-6 md:h-8 md:w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
+                <span className="hidden sm:block text-sm font-medium text-gray-700">
                   {user?.user_metadata?.first_name || user?.email || 'User'}
                 </span>
                 <button
@@ -334,15 +334,15 @@ const Dashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
           {stats.map((stat) => (
-            <div key={stat.name} className="bg-white rounded-2xl card-shadow p-6">
+            <div key={stat.name} className="bg-white rounded-2xl card-shadow p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  <p className="text-xs md:text-sm font-medium text-gray-600">{stat.name}</p>
+                  <p className="text-lg md:text-2xl font-bold text-gray-900">{stat.value}</p>
                 </div>
-                <div className={`text-sm font-medium ${
+                <div className={`text-xs md:text-sm font-medium ${
                   stat.changeType === 'positive' ? 'text-green-600' : 
                   stat.changeType === 'negative' ? 'text-red-600' : 'text-gray-500'
                 }`}>
@@ -353,21 +353,21 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8">
             {/* Quick Actions */}
-            <div className="bg-white rounded-2xl card-shadow p-6">
+            <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {quickActions.map((action) => (
                   <button
                     key={action.name}
                     onClick={action.action}
-                    className="flex flex-col items-center p-4 rounded-xl border-2 border-gray-100 hover:border-[#8B0000] hover:bg-[#8B0000]/5 transition-all duration-200 group"
+                    className="flex flex-col items-center p-3 md:p-4 rounded-xl border-2 border-gray-100 hover:border-[#8B0000] hover:bg-[#8B0000]/5 transition-all duration-200 group"
                   >
-                    <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">{action.icon}</span>
-                    <span className="text-sm font-medium text-gray-700 text-center">{action.name}</span>
+                    <span className="text-xl md:text-2xl mb-2 group-hover:scale-110 transition-transform">{action.icon}</span>
+                    <span className="text-xs md:text-sm font-medium text-gray-700 text-center">{action.name}</span>
                   </button>
                 ))}
               </div>
@@ -377,9 +377,9 @@ const Dashboard = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
             {/* Current Print Status */}
-            <div className="bg-white rounded-2xl card-shadow p-6">
+            <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Current Print</h2>
               {isPrinting ? (
                 <div className="text-center">
@@ -416,11 +416,11 @@ const Dashboard = () => {
             </div>
 
             {/* Popular Products */}
-            <div className="bg-white rounded-2xl card-shadow p-6">
+            <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Popular Products</h2>
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 <div className="flex items-center space-x-3 p-3 rounded-xl bg-gray-50">
-                  <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-100 rounded-lg flex items-center justify-center">
                     🧸
                   </div>
                   <div className="flex-1">
@@ -430,7 +430,7 @@ const Dashboard = () => {
                   <span className="text-sm font-semibold text-[#8B0000]">$25</span>
                 </div>
                 <div className="flex items-center space-x-3 p-3 rounded-xl bg-gray-50">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     🎭
                   </div>
                   <div className="flex-1">
@@ -440,7 +440,7 @@ const Dashboard = () => {
                   <span className="text-sm font-semibold text-[#8B0000]">$35</span>
                 </div>
                 <div className="flex items-center space-x-3 p-3 rounded-xl bg-gray-50">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     🎨
                   </div>
                   <div className="flex-1">

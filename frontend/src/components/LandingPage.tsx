@@ -29,20 +29,18 @@ const DribbbleIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill=
 // --- Components ---
 
 const Header = ({ navigate }: { navigate: (path: string) => void }) => (
-  <header className="w-full flex justify-center">
+  <header className="w-full flex justify-center px-4">
     <div 
-      className="bg-[#ECECEC] rounded-[30px] flex items-center justify-between"
+      className="bg-[#ECECEC] rounded-[30px] flex items-center justify-between w-full max-w-6xl"
       style={{
-        width: '1123px',
-        height: '93px',
-        marginTop: '49px',
-        marginLeft: '158px',
-        padding: '20px 60px',
+        minHeight: '60px',
+        marginTop: '20px',
+        padding: '16px 20px',
         gap: '10px'
       }}
     >
-      <div className="font-bold text-2xl font-manrope">Cudliy.</div>
-      <nav className="hidden md:flex items-center gap-10 text-gray-800 font-semibold font-manrope">
+      <div className="font-bold text-xl md:text-2xl font-manrope">Cudliy.</div>
+      <nav className="hidden md:flex items-center gap-6 lg:gap-10 text-gray-800 font-semibold font-manrope">
         <a href="#" className="hover:text-black">Home</a>
         <div className="flex items-center gap-2 cursor-pointer hover:text-black">
           <span>Resources</span>
@@ -50,11 +48,11 @@ const Header = ({ navigate }: { navigate: (path: string) => void }) => (
         </div>
         <a href="#" className="hover:text-black">Contact</a>
       </nav>
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate('/signin')} className="font-semibold text-gray-800 hover:text-black font-manrope">
+      <div className="flex items-center gap-2 md:gap-4">
+        <button onClick={() => navigate('/signin')} className="font-semibold text-gray-800 hover:text-black font-manrope text-sm md:text-base">
           Login
         </button>
-        <button onClick={() => navigate('/signup')} className="bg-black text-white px-6 py-2 rounded-full font-semibold hover:bg-gray-800 transition-colors font-manrope">
+        <button onClick={() => navigate('/signup')} className="bg-black text-white px-3 md:px-6 py-2 rounded-full font-semibold hover:bg-gray-800 transition-colors font-manrope text-sm md:text-base">
           Sign up
         </button>
       </div>
@@ -63,23 +61,23 @@ const Header = ({ navigate }: { navigate: (path: string) => void }) => (
 );
 
 const HeroSection = ({ navigate }: { navigate: (path: string) => void }) => (
-  <section className="w-[1440px] max-w-7xl mx-auto py-20 px-8 flex items-center">
-    <div className="flex-1 pr-16">
-      <h1 className="text-6xl w-[630px] h-[154px] font-bold text-black leading-tight font-nohemi">
+  <section className="w-full max-w-7xl mx-auto py-10 md:py-20 px-4 md:px-8 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+    <div className="flex-1 text-center lg:text-left">
+      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight font-nohemi max-w-2xl mx-auto lg:mx-0">
         Create Your Own Toy <br /> with Just a Prompt
       </h1>
-      <p className="mt-6 text-xl w-[630px] h-[68px]text-[#000000] max-w-md font-nohemi">
+      <p className="mt-4 md:mt-6 text-lg md:text-xl text-[#000000] max-w-md mx-auto lg:mx-0 font-nohemi">
         Cudily turns your words into custom 3D toy designs using AI magic. Preview it. Print it. Play with it.
       </p>
       <button
         onClick={() => navigate('/signup')}
-        className="mt-14 w-[301px] h-[55px] bg-black text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors font-manrope"
+        className="mt-8 md:mt-14 w-full md:w-auto px-8 py-4 bg-black text-white rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors font-manrope"
       >
         Start Creating Your Toy
       </button>
     </div>
-    <div className="flex-1">
-      <div className="w-[568px] h-[583px] bg-gray-100 rounded-3xl">
+    <div className="flex-1 w-full max-w-md lg:max-w-none">
+      <div className="w-full h-64 md:h-96 lg:h-[583px] bg-gray-100 rounded-3xl">
         {/* Placeholder for 3D model/image */}
       </div>
     </div>
@@ -92,41 +90,41 @@ const PossibilitiesSection = () => {
       const categories = [
   
           { icon: '/ic1.png', name: 'Superhero' },
-          { icon: '/ic2.png', name: 'Colored Race Car' },
-          { icon: '/ic3.png', name: 'Fantasy Friends' },
-          { icon: '/ic4.png', name: 'Teddy Bear' },
-          { icon: '/ic5.png', name: 'Techy Toys' },
-          { icon: '/ic6.png', name: 'Birthday Cake' },
-          { icon: '/ic7.png', name: 'Skateboarding Panda' },
+           { icon: '/ic2.png', name: 'Colored Race Car' },
+           { icon: '/ic3.png', name: 'Fantasy Friends' },
+           { icon: '/ic4.png', name: 'Teddy Bear' },
+           { icon: '/ic5.png', name: 'Techy Toys' },
+           { icon: '/ic6.png', name: 'Birthday Cake' },
+           { icon: '/ic7.png', name: 'Skateboarding Panda' },
   
       ];
     // Duplicate the array for a seamless, infinite scroll effect
     const scrollingCategories = [...categories, ...categories];
 
     return (
-        <section className="w-full max-w-7xl mx-auto py-20 px-8 flex items-center justify-center">
-            <div className="flex items-center justify-center">
+        <section className="w-full max-w-7xl mx-auto py-10 md:py-20 px-4 md:px-8 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16">
+            <div className="flex items-center justify-center order-2 lg:order-1">
                 {/* This container creates the viewport for the scrolling animation and the fade effect */}
                 <div 
                     className="relative overflow-hidden"
                     style={{
-                        width: '440.36700439453125px',
-                        height: '394.29681396484375px',
+                        width: '280px',
+                        height: '250px',
                         maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)',
                         WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)'
                     }}
                 >
                     {/* This div contains the duplicated list and has the animation applied */}
-                    <div className="flex flex-col animate-scroll-y" style={{ gap: '22.05px' }}>
+                    <div className="flex flex-col animate-scroll-y" style={{ gap: '15px' }}>
                         {scrollingCategories.map((cat, index) => (
-                            <div key={index} className="flex items-center gap-6">
+                            <div key={index} className="flex items-center gap-4">
                                 <img 
                                     src={cat.icon} 
                                     alt={cat.name} 
                                     className="object-contain" 
                                     style={{
-                                        width: '39.2px',
-                                        height: '39.2px',
+                                        width: '30px',
+                                        height: '30px',
                                         transform: 'translateZ(0)',
                                         backfaceVisibility: 'hidden',
                                         imageRendering: 'crisp-edges'
@@ -137,7 +135,7 @@ const PossibilitiesSection = () => {
                                     style={{
                                         fontFamily: 'Helvetica Neue',
                                         fontStyle: 'normal',
-                                        fontSize: '39.29px',
+                                        fontSize: '24px',
                                         lineHeight: '100%',
                                         letterSpacing: '0%',
                                         textAlign: 'center'
@@ -150,11 +148,11 @@ const PossibilitiesSection = () => {
                     </div>
                 </div>
             </div>
-            <div className="ml-16 flex flex-col items-center justify-center text-center">
-                <h2 className="text-[42px] font-bold text-black leading-tight font-nohemi">
+            <div className="order-1 lg:order-2 flex flex-col items-center justify-center text-center lg:ml-16">
+                <h2 className="text-3xl md:text-4xl lg:text-[42px] font-bold text-black leading-tight font-nohemi">
                     Endless Possibilities. <br /> One Imagination. Yours.
                 </h2>
-                <p className="mt-4 text-xl text-[#898989] max-w-sm font-nohemi">
+                <p className="mt-4 text-lg md:text-xl text-[#898989] max-w-sm font-nohemi">
                     Don't know where to start? Get inspired by our most-loved creations!
                 </p>
             </div>
@@ -172,20 +170,20 @@ const HowItWorksSection = () => {
     ];
 
     return (
-        <section className="w-full bg-[#F9F9F9] py-20">
-            <div className="w-full max-w-7xl mx-auto px-8">
-                <h2 className="text-5xl font-bold text-black text-center mb-12 font-nohemi">How it works</h2>
-                <div className="relative flex justify-center items-center gap-8">
+        <section className="w-full bg-[#F9F9F9] py-10 md:py-20">
+            <div className="w-full max-w-7xl mx-auto px-4 md:px-8">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black text-center mb-8 md:mb-12 font-nohemi">How it works</h2>
+                <div className="relative flex flex-col md:flex-row justify-center items-center gap-6 md:gap-8">
                     {cards.map((card, index) => (
-                        <div key={index} className="bg-white p-8 rounded-3xl w-96">
-                            <h3 className="text-2xl font-bold text-black font-nohemi">{card.title}</h3>
+                        <div key={index} className="bg-white p-6 md:p-8 rounded-3xl w-full max-w-sm md:w-96">
+                            <h3 className="text-xl md:text-2xl font-bold text-black font-nohemi">{card.title}</h3>
                             <p className="mt-2 text-gray-600 font-manrope">{card.description}</p>
-                            <div className="mt-6 w-full h-56 bg-gray-100 rounded-2xl">
+                            <div className="mt-6 w-full h-40 md:h-56 bg-gray-100 rounded-2xl">
                                 {/* Placeholder */}
                             </div>
                         </div>
                     ))}
-                     <button className="absolute right-[-50px] bg-white rounded-full w-14 h-14 flex items-center justify-center shadow-md text-gray-600 hover:text-black">
+                     <button className="hidden md:flex absolute right-[-50px] bg-white rounded-full w-14 h-14 items-center justify-center shadow-md text-gray-600 hover:text-black">
                         <ArrowRightIcon />
                     </button>
                 </div>
@@ -205,13 +203,13 @@ const FAQSection = () => {
     ];
 
     return (
-        <section className="w-full max-w-3xl mx-auto py-20 px-8">
-            <h2 className="text-5xl font-bold text-black text-center mb-12 font-nohemi">Frequently Asked Questions</h2>
+        <section className="w-full max-w-3xl mx-auto py-10 md:py-20 px-4 md:px-8">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black text-center mb-8 md:mb-12 font-nohemi">Frequently Asked Questions</h2>
             <div className="space-y-4">
                 {faqs.map((faq, index) => (
                     <div key={index} className="border-b border-gray-200 pb-4">
                         <div className="flex justify-between items-center cursor-pointer">
-                            <p className="text-lg font-medium text-gray-800 font-manrope">{faq}</p>
+                            <p className="text-base md:text-lg font-medium text-gray-800 font-manrope pr-4">{faq}</p>
                             <PlusIcon />
                         </div>
                     </div>
@@ -222,24 +220,24 @@ const FAQSection = () => {
 };
 
 const Footer = () => (
-    <footer className="w-full bg-white pt-20 pb-8">
-        <div className="w-full max-w-7xl mx-auto px-8">
-            <div className="flex justify-between items-center border-b border-gray-200 pb-8">
-                 <div className="font-bold text-2xl font-manrope">Cudliy.</div>
-                 <div className="flex items-center gap-6 text-gray-500">
+    <footer className="w-full bg-white pt-10 md:pt-20 pb-8">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-8">
+            <div className="flex flex-col md:flex-row justify-between items-center border-b border-gray-200 pb-8 gap-4 md:gap-0">
+                 <div className="font-bold text-xl md:text-2xl font-manrope">Cudliy.</div>
+                 <div className="flex items-center gap-4 md:gap-6 text-gray-500">
                     <a href="#" className="hover:text-black"><InstagramIcon /></a>
                     <a href="#" className="hover:text-black"><TwitterIcon /></a>
                     <a href="#" className="hover:text-black"><DribbbleIcon /></a>
                  </div>
-                 <a href="mailto:Hello@CudilyCom" className="font-semibold text-gray-800 hover:text-black font-manrope">
+                 <a href="mailto:Hello@CudilyCom" className="font-semibold text-gray-800 hover:text-black font-manrope text-sm md:text-base">
                     Hello@Cudily.Com
                  </a>
             </div>
-            <div className="flex justify-between items-center pt-8 text-gray-500 font-manrope">
-                <p>&copy; {new Date().getFullYear()} Cudily. All rights reserved.</p>
-                <div className="flex gap-6">
-                    <a href="#" className="hover:text-black">Privacy Policy</a>
-                    <a href="#" className="hover:text-black">Terms of Service</a>
+            <div className="flex flex-col md:flex-row justify-between items-center pt-8 text-gray-500 font-manrope gap-4 md:gap-0">
+                <p className="text-sm md:text-base">&copy; {new Date().getFullYear()} Cudily. All rights reserved.</p>
+                <div className="flex gap-4 md:gap-6">
+                    <a href="#" className="hover:text-black text-sm md:text-base">Privacy Policy</a>
+                    <a href="#" className="hover:text-black text-sm md:text-base">Terms of Service</a>
                 </div>
             </div>
         </div>

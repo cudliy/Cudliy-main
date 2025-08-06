@@ -302,47 +302,47 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
       
       {/* Control buttons */}
       {showControls && (
-        <div className="absolute top-4 right-4 flex flex-col space-y-2">
+        <div className="absolute top-2 right-2 md:top-4 md:right-4 flex flex-col space-y-1 md:space-y-2">
           <button
             onClick={resetView}
-            className="p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white transition-colors group"
+            className="p-1.5 md:p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white transition-colors group"
             title="Reset View"
           >
-            <svg className="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 md:w-4 md:h-4 group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
           
           <button
             onClick={toggleAutoRotate}
-            className={`p-2 backdrop-blur-sm rounded-lg shadow-lg transition-colors ${
+            className={`p-1.5 md:p-2 backdrop-blur-sm rounded-lg shadow-lg transition-colors ${
               currentAutoRotate 
                 ? 'bg-[#8B0000] text-white hover:bg-[#6B0000]' 
                 : 'bg-white/80 hover:bg-white'
             }`}
             title={currentAutoRotate ? "Stop Auto-Rotate" : "Start Auto-Rotate"}
           >
-            <svg className={`w-4 h-4 ${currentAutoRotate ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-3 h-3 md:w-4 md:h-4 ${currentAutoRotate ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
 
           <button
             onClick={zoomIn}
-            className="p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white transition-colors"
+            className="p-1.5 md:p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white transition-colors"
             title="Zoom In"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
             </svg>
           </button>
 
           <button
             onClick={zoomOut}
-            className="p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white transition-colors"
+            className="p-1.5 md:p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white transition-colors"
             title="Zoom Out"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
             </svg>
           </button>

@@ -191,21 +191,21 @@ const AICreation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="mx-auto h-16 w-16 mb-4 floating-animation">
+        <div className="text-center mb-6 md:mb-8">
+          <div className="mx-auto h-12 w-12 md:h-16 md:w-16 mb-4 floating-animation">
             <img src="/Main Brand ICON.svg" alt="Cudliy Logo" className="h-full w-full" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">AI-Powered 3D Creation</h1>
-          <p className="text-lg text-gray-600">Describe what you want, generate an image, then convert to 3D</p>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">AI-Powered 3D Creation</h1>
+          <p className="text-base md:text-lg text-gray-600">Describe what you want, generate an image, then convert to 3D</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Input Section */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl card-shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Describe Your Creation</h2>
+          <div className="space-y-4 md:space-y-6">
+            <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
+              <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">Describe Your Creation</h2>
               
               <div className="space-y-4">
                 <div className="relative">
@@ -250,7 +250,7 @@ const AICreation = () => {
             </div>
 
             {/* Progress Steps */}
-            <div className="bg-white rounded-2xl card-shadow p-6">
+            <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Creation Progress</h3>
               <div className="space-y-4">
                 {steps.map((step) => (
@@ -278,7 +278,7 @@ const AICreation = () => {
             </div>
 
             {/* Webhook Status */}
-            <div className="bg-white rounded-2xl card-shadow p-6">
+            <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Webhook Status</h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-3">
@@ -316,9 +316,9 @@ const AICreation = () => {
           </div>
 
           {/* Results Section */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {generatedImage && (
-              <div className="bg-white rounded-2xl card-shadow p-6">
+              <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Generated Image</h3>
                 <div className="aspect-square rounded-xl overflow-hidden bg-gray-100">
                   <img src={generatedImage} alt="Generated from text" className="w-full h-full object-cover" />
@@ -356,7 +356,7 @@ const AICreation = () => {
             )}
 
             {generated3DModel && (
-              <div className="bg-white rounded-2xl card-shadow p-6">
+              <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">3D Model</h3>
                 <div className="aspect-square rounded-xl overflow-hidden bg-gray-100">
                   {/* 3D Model Viewer */}
@@ -413,8 +413,8 @@ const AICreation = () => {
 
 
             {!generatedImage && (
-              <div className="bg-white rounded-2xl card-shadow p-6">
-                <div className="text-center py-12">
+              <div className="bg-white rounded-2xl card-shadow p-4 md:p-6">
+                <div className="text-center py-8 md:py-12">
                   <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

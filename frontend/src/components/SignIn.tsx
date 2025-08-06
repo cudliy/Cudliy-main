@@ -47,7 +47,7 @@ const SignInPage = () => {
 
   return (
     <div 
-      className="flex bg-white overflow-hidden w-full h-screen"
+      className="flex flex-col lg:flex-row bg-white overflow-hidden w-full min-h-screen"
       style={{ 
         fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif'
       }}
@@ -61,22 +61,21 @@ const SignInPage = () => {
       />
       {/* Form Container */}
       <div 
-        className="bg-white flex items-center justify-center flex-shrink-0"
+        className="bg-white flex items-center justify-center flex-shrink-0 w-full lg:w-auto"
         style={{ 
-          width: '720px', 
-          height: '100vh'
+          minHeight: '100vh',
+          padding: '20px'
         }}
       >
         {/* Form Layout */}
         <div 
-          className="bg-white flex flex-col justify-center"
+          className="bg-white flex flex-col justify-center w-full max-w-md"
           style={{ 
-            width: '610px',
-            paddingTop: '40px',
-            paddingRight: '44px',
-            paddingBottom: '40px',
-            paddingLeft: '44px',
-            gap: '40px'
+            paddingTop: '20px',
+            paddingRight: '20px',
+            paddingBottom: '20px',
+            paddingLeft: '20px',
+            gap: '30px'
           }}
         >
           {/* Header Section */}
@@ -95,7 +94,7 @@ const SignInPage = () => {
             <h2 
               className="text-black"
               style={{ 
-                fontSize: '36px',
+                fontSize: '28px',
                 fontWeight: '700',
                 fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif',
                 margin: '6px 0 0 0'
@@ -251,14 +250,14 @@ const SignInPage = () => {
           </div>
         </div>
       </div>
-             {/* 3D Model Side Panel */}
-       <div 
-         className="flex-1 relative"
-         style={{ 
-           height: '100vh',
-           background: '#000000'
-         }}
-       >
+                          {/* 3D Model Side Panel */}
+        <div 
+          className="hidden lg:block flex-1 relative"
+          style={{ 
+            height: '100vh',
+            background: '#000000'
+          }}
+        >
                  <ModelViewer
            modelUrl="/output (8).glb"
            alt="Cudliy 3D Model"
