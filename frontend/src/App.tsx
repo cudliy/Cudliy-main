@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import SignIn from './components/SignIn'
-import SignUp from './components/SignUp.js'
-import Dashboard from './components/Dashboard.jsx'
+import SignUp from './components/SignUp'
+import Dashboard from './components/Dashboard'
 import LandingPage from './components/LandingPage'
 
 function AppContent() {

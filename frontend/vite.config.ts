@@ -6,6 +6,7 @@ import autoprefixer from 'autoprefixer'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/',
   css: {
     postcss: {
       plugins: [
@@ -19,5 +20,12 @@ export default defineConfig({
   },
   preview: {
     port: 3000,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
 })
