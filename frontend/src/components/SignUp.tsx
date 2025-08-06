@@ -78,9 +78,10 @@ const SignUpPage = () => {
         onClose={() => setShowToast(false)}
         duration={toastType === 'success' ? 3000 : 5000}
       />
-      {/* Form Container */}
+      
+      {/* Form Container - Takes half width on desktop, full width on mobile */}
       <div 
-        className="bg-white flex items-center justify-center flex-shrink-0 w-full lg:w-auto"
+        className="bg-white flex items-center justify-center w-full lg:w-1/2 flex-shrink-0"
         style={{ 
           minHeight: '100vh',
           padding: '20px'
@@ -88,7 +89,7 @@ const SignUpPage = () => {
       >
         {/* Form Layout */}
         <div 
-          className="bg-white flex flex-col w-full max-w-md"
+          className="bg-white flex flex-col w-full max-w-md mx-auto"
           style={{ 
             paddingTop: '20px',
             paddingRight: '20px',
@@ -297,9 +298,9 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      {/* 3D Model Side Panel */}
+      {/* 3D Model Side Panel - Takes half width on desktop, hidden on mobile/tablet */}
       <div 
-        className="hidden lg:block flex-1 relative"
+        className="hidden lg:block w-1/2 relative flex-shrink-0"
         style={{ 
           height: '100vh',
           background: '#000000'
@@ -313,7 +314,6 @@ const SignUpPage = () => {
           showControls={false}
           backgroundColor="transparent"
           shadowIntensity={0.8}
-
           loadingMessage="Loading Cudliy Experience..."
           errorMessage="Failed to load 3D model"
           className="w-full h-full"

@@ -43,8 +43,6 @@ const SignInPage = () => {
     }
   };
 
-
-
   return (
     <div 
       className="flex flex-col lg:flex-row bg-white overflow-hidden w-full min-h-screen"
@@ -59,9 +57,10 @@ const SignInPage = () => {
         onClose={() => setShowToast(false)}
         duration={toastType === 'success' ? 3000 : 5000}
       />
-      {/* Form Container */}
+      
+      {/* Form Container - Takes half width on desktop, full width on mobile */}
       <div 
-        className="bg-white flex items-center justify-center flex-shrink-0 w-full lg:w-auto"
+        className="bg-white flex items-center justify-center w-full lg:w-1/2 flex-shrink-0"
         style={{ 
           minHeight: '100vh',
           padding: '20px'
@@ -69,7 +68,7 @@ const SignInPage = () => {
       >
         {/* Form Layout */}
         <div 
-          className="bg-white flex flex-col justify-center w-full max-w-md"
+          className="bg-white flex flex-col justify-center w-full max-w-md mx-auto"
           style={{ 
             paddingTop: '20px',
             paddingRight: '20px',
@@ -250,29 +249,30 @@ const SignInPage = () => {
           </div>
         </div>
       </div>
-                          {/* 3D Model Side Panel */}
-        <div 
-          className="hidden lg:block flex-1 relative"
-          style={{ 
-            height: '100vh',
-            background: '#000000'
-          }}
-        >
-                 <ModelViewer
-           modelUrl="/output (8).glb"
-           alt="Cudliy 3D Model"
-           autoRotate={true}
-           cameraControls={true}
-           showControls={false}
-           backgroundColor="transparent"
-           shadowIntensity={0.8}
-           loadingMessage="Loading Cudliy Experience..."
-           errorMessage="Failed to load 3D model"
-           className="w-full h-full"
-           style={{ width: '100%', height: '100%' }}
-           onLoad={() => console.log('3D model loaded successfully')}
-           onError={(error) => console.error('3D model error:', error)}
-         />
+
+      {/* 3D Model Side Panel - Takes half width on desktop, hidden on mobile/tablet */}
+      <div 
+        className="hidden lg:block w-1/2 relative flex-shrink-0"
+        style={{ 
+          height: '100vh',
+          background: '#000000'
+        }}
+      >
+        <ModelViewer
+          modelUrl="/output (8).glb"
+          alt="Cudliy 3D Model"
+          autoRotate={true}
+          cameraControls={true}
+          showControls={false}
+          backgroundColor="transparent"
+          shadowIntensity={0.8}
+          loadingMessage="Loading Cudliy Experience..."
+          errorMessage="Failed to load 3D model"
+          className="w-full h-full"
+          style={{ width: '100%', height: '100%' }}
+          onLoad={() => console.log('3D model loaded successfully')}
+          onError={(error) => console.error('3D model error:', error)}
+        />
       </div>
     </div>
   );
